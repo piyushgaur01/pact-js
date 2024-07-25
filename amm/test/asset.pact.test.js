@@ -1,6 +1,8 @@
 const { Verifier } = require('@pact-foundation/pact');
 const path = require('path');
 
+const controller = require('../asset/asset.controller');
+
 // Setup provider server to verify
 const app = require('express')();
 app.use(require('../asset/asset.routes'));
@@ -15,13 +17,20 @@ describe("Pact Verification", () => {
             providerVersion: "1.0.0",
             pactUrls: [
                 path.resolve(__dirname, '../../de/pacts/data-explorer-asset-model-manager.json')
-            ]
+            ],
+            stateHandlers: {
+                "no assets exist": () => {
+                    controller.repository.assets = new Map();
+                }
+            }
         };
 
         return new Verifier(opts).verifyProvider().then(output => {
             console.log(output);
+            done();
         }).finally(() => {
             server.close();
+            done();
         });
     })
 });

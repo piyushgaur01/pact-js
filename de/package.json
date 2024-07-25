@@ -5,13 +5,13 @@
     "main": "server.js",
     "scripts": {
         "test": "mocha",
-        "test:pact": "cross-env CI=true mocha test --testTimeout 30000"
+        "test:pact": "cross-env CI=true mocha test --testTimeout 30000",
+        "pactPublish": "pact-broker publish ./pacts --consumer-app-version=\"1.0.0\" --broker-base-url=http://10.16.14.56:9292 --broker-username pact_workshop --broker-password pact_workshop"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@pact-foundation/pact": "^13.1.1",
         "axios": "^1.7.2",
         "chai": "^4.4.1",
         "cross-env": "^7.0.3",
@@ -20,6 +20,9 @@
         "nock": "^13.5.4"
     },
     "devDependencies": {
+        "@pact-foundation/pact": "^13.1.1",
+        "@pact-foundation/pact-cli": "^15.0.3",
+        "chai-http": "4.4",
         "chai-like": "^1.1.1",
         "chai-things": "^0.2.0"
     }

@@ -8,6 +8,7 @@ const { expect } = chai;
 
 chai.use(require('chai-like'));
 chai.use(require('chai-things')); // Don't swap these two
+chai.use(require('chai-http'));
 
 chai.use(deepEqualInAnyOrder);
 
@@ -54,6 +55,32 @@ describe('AMM API Pact test', () => {
                 const result = await de.getAssets();
                 expect(result).to.be.an('array');
               });
+        });
+
+        it('should return no assets', async () => {
+            // setup pact interaction
+            await provider.addInteraction({
+                state: 'no assets exist',
+                uponReceiving: 'get all assets return []',
+                withRequest: {
+                    method: 'GET',
+                    path: '/assets'
+                },
+                willRespondWith: {
+                    status: 200,
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8',
+                    },
+                    body: []
+                },
+            });
+            await provider.executeTest(async (mockService) => {
+                const de = new DE(mockService.url);
+        
+                // make request to Pact mock server
+                const result = await de.getAssets();
+                expect(result.length).to.eq(0);
+              });
         })
     })
     describe('get Assets By Id', () => {
@@ -88,6 +115,33 @@ describe('AMM API Pact test', () => {
                 // make request to Pact mock server
                 const result = await de.getAssetWithId(8213);
                 expect(asset).to.deep.equalInAnyOrder(result);
+
+            });
+        });
+
+        it('asset does not exists', async () => {
+            // setup pact interaction
+            await provider.addInteraction({
+                state: 'asset with ID 101 does not exist',
+                uponReceiving: 'a request for asset with ID 101',
+                withRequest: {
+                    method: 'GET',
+                    path: '/asset/101',
+                },
+                willRespondWith: {
+                    status: 404,
+                },
+            });
+
+            await provider.executeTest(async (mockService) => {
+                const de = new DE(mockService.url);
+                
+                // make request to Pact mock server
+                try {
+                    await de.getAssetWithId(101)
+                } catch (error) {
+                    expect(error.message).eq('Request failed with status code 404');
+                }
 
             });
         });
